@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Cocktail Wordle — Daily Speakeasy Spec</title>
+  <meta name="description" content="A daily 5-letter cocktail puzzle exploring classic mixology, spirits, and speakeasy lore.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient Cocktail Lounge & Animated Gold Garnish Atmosphere -->
+  <div class="lounge-ambient" aria-hidden="true">
+    <div class="ambient-glow glow-top"></div>
+    <div class="ambient-glow glow-bottom"></div>
+    <div class="lounge-light-beam"></div>
+    <div id="garnish-container" class="garnish-container"></div>
+  </div>
+
+  <!-- Screen Reader Live Announcements -->
+  <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Toast Notification Alerts -->
+  <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+
+  <!-- ======================================================================
+       1. STANDALONE MAIN MENU SCREEN
+       ====================================================================== -->
+  <section id="screen-menu" class="app-screen screen-menu active">
+    <div class="menu-content-wrapper">
+      
+      <!-- Brand & Game Identity -->
+      <header class="menu-brand-header">
+        <div class="brand-eyebrow">THE 86 COCKTAIL COLLECTION</div>
+        <h1 class="brand-title-main">
+          <span class="gold-shimmer">COCKTAIL</span> WORDLE
+        </h1>
+        <p class="brand-tagline">Daily 5-Letter Speakeasy Specification</p>
+      </header>
+
+      <!-- Primary Action: Today's Spec Card -->
+      <div class="menu-primary-section">
+        <div id="card-today-spec" class="today-hero-card neo-card glass-panel" role="region" aria-label="Today's Puzzle">
+          <div class="card-glow-pill">DAILY RELEASE</div>
+          <div class="today-card-body">
+            <div class="today-meta-row">
+              <span id="menu-today-number" class="today-spec-badge">SPEC #0</span>
+              <span id="menu-today-date" class="today-date-text">TODAY</span>
+            </div>
+            <h2 id="menu-today-status-title" class="today-title">Today's Cocktail Spec</h2>
+            <p id="menu-today-desc" class="today-desc">Test your palate with today's 5-letter mixology term, bar technique, or vintage spirit.</p>
+            <div class="today-status-row">
+              <span id="menu-today-progress-badge" class="badge-status">UNPLAYED</span>
+              <span id="menu-today-curriculum" class="today-curriculum-hint">Curriculum: Mixology</span>
+            </div>
+          </div>
+          <button id="btn-play-today" class="neo-btn btn-hero">
+            <span class="btn-icon">🍸</span>
+            <span id="btn-play-today-text">PLAY TODAY'S SPEC</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Secondary Navigation Hierarchy: Vault, Hub, Sound -->
+      <nav class="menu-nav-list" aria-label="Game navigation">
+        
+        <!-- The Vault Button -->
+        <button id="btn-open-vault" class="menu-nav-item neo-card glass-panel">
+          <div class="nav-item-left">
+            <span class="nav-item-icon">🗝️</span>
+            <div class="nav-item-text">
+              <strong>THE VAULT</strong>
+              <small id="menu-vault-count">Archive of previous released specs</small>
+            </div>
+          </div>
+          <span class="nav-item-chevron">→</span>
+        </button>
+
+        <!-- Master Hub (86 Platform) Link -->
+        <a id="nav-hub-home" href="https://tileworksgamesstudio.github.io/86/" class="menu-nav-item neo-card glass-panel external-link">
+          <div class="nav-item-left">
+            <span class="nav-item-icon">🚪</span>
+            <div class="nav-item-text">
+              <strong>86 PLATFORM HUB</strong>
+              <small>Explore the 8-game cocktail puzzle collection</small>
+            </div>
+          </div>
+          <span class="nav-item-chevron">↗</span>
+        </a>
+
+        <!-- Controls Utility Row: Sound, Records, Instructions -->
+        <div class="menu-auxiliary-row">
+          <button id="btn-menu-sound" class="aux-btn neo-card" aria-label="Toggle Sound">
+            <span id="menu-sound-icon">🎵</span>
+            <span id="menu-sound-label">SOUND: ON</span>
+          </button>
+          <button id="btn-menu-stats" class="aux-btn neo-card" aria-label="View Patron Records">
+            <span>📊</span>
+            <span>RECORDS</span>
+          </button>
+          <button id="btn-menu-how" class="aux-btn neo-card" aria-label="How to Play">
+            <span>❓</span>
+            <span>RULES</span>
+          </button>
+        </div>
+      </nav>
+
+      <footer class="menu-footer">
+        <span>Part of the 32-Category Cocktail Curriculum</span>
+      </footer>
+
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       2. ACTIVE GAMEPLAY SCREEN
+       ====================================================================== -->
+  <section id="screen-game" class="app-screen screen-game hidden">
+    
+    <!-- In-Game Bar Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <button id="btn-game-back" class="icon-btn" aria-label="Back to Main Menu" title="Return to Menu">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <button id="btn-game-how" class="icon-btn" aria-label="How to play" title="Instructions">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="header-center">
+        <div class="brand-title">
+          <span class="gold-shimmer">COCKTAIL</span> WORDLE
+        </div>
+        <div id="puzzle-badge" class="puzzle-badge">TODAY'S SPEC #0</div>
+      </div>
+
+      <div class="header-right">
+        <button id="btn-game-sound" class="icon-btn" aria-label="Toggle Sound" title="Sound: ON">
+          <svg id="sound-icon-on" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.2" fill="none">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <svg id="sound-icon-off" class="hidden" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.2" fill="none">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+        <button id="btn-game-stats" class="icon-btn" aria-label="View Statistics" title="Statistics">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.2" fill="none">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Archived Vault Banner (Visible only when playing a past puzzle) -->
+    <div id="vault-banner" class="vault-banner hidden" role="status">
+      <span>Browsing Vault Spec <strong id="vault-banner-day">#0</strong></span>
+      <button id="btn-return-today" class="btn-text-gold">Return to Today</button>
+    </div>
+
+    <!-- Main Game Board Container -->
+    <main id="game-container" class="game-container">
+      <div id="board-wrapper" class="board-wrapper">
+        <div id="board" class="board" role="grid" aria-label="Wordle 6-guess grid">
+          <!-- 6 rows x 5 tiles dynamically rendered -->
+        </div>
+      </div>
+
+      <!-- On-Screen Virtual Bar Keyboard -->
+      <div id="keyboard" class="keyboard" role="group" aria-label="Bar keyboard">
+        <!-- Generated by script.js -->
+      </div>
+    </main>
+
+  </section>
+
+  <!-- ======================================================================
+       3. MODAL: THE VAULT (ARCHIVED SPECS)
+       ====================================================================== -->
+  <div id="modal-vault" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="vault-title">
+    <div class="modal-card neo-card glass-panel modal-scrollable">
+      <div class="modal-header">
+        <div>
+          <h2 id="vault-title" class="gold-shimmer">THE VAULT</h2>
+          <span class="vault-subtitle">Previously Released Cocktail Specs</span>
+        </div>
+        <button class="modal-close" data-close="modal-vault" aria-label="Close vault">&times;</button>
+      </div>
+
+      <div class="vault-filter-bar">
+        <label for="vault-filter-difficulty" class="sr-only">Filter by difficulty</label>
+        <select id="vault-filter-difficulty" class="neo-select">
+          <option value="ALL">All Curricula & Difficulties</option>
+          <option value="Beginner">Beginner</option>
+          <option value="Easy">Easy</option>
+          <option value="Medium">Medium</option>
+          <option value="Hard">Hard</option>
+          <option value="Expert">Expert</option>
+        </select>
+      </div>
+
+      <div id="vault-list" class="vault-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       4. MODAL: HOW TO PLAY
+       ====================================================================== -->
+  <div id="modal-how" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="how-title">
+    <div class="modal-card neo-card glass-panel modal-scrollable">
+      <div class="modal-header">
+        <h2 id="how-title" class="gold-shimmer">HOW TO PLAY</h2>
+        <button class="modal-close" data-close="modal-how" aria-label="Close instructions">&times;</button>
+      </div>
+      <div class="how-content">
+        <p class="how-lead">Guess the 5-letter cocktail specification in <strong>6 tries</strong>. Every spec is drawn from the 32-category cocktail curriculum—classic spirits, mixing techniques, glassware, aromatics, and speakeasy lore.</p>
+
+        <div class="how-examples">
+          <div class="example-row">
+            <div class="example-tiles">
+              <span class="tile tile-example correct">S<span class="tile-symbol">✓</span></span>
+              <span class="tile tile-example">H</span>
+              <span class="tile tile-example">A</span>
+              <span class="tile tile-example">K</span>
+              <span class="tile tile-example">E</span>
+            </div>
+            <p><strong>S</strong> is in the cocktail specification and in the exact correct position.</p>
+          </div>
+
+          <div class="example-row">
+            <div class="example-tiles">
+              <span class="tile tile-example">A</span>
+              <span class="tile tile-example present">M<span class="tile-symbol">◐</span></span>
+              <span class="tile tile-example">A</span>
+              <span class="tile tile-example">R</span>
+              <span class="tile tile-example">O</span>
+            </div>
+            <p><strong>M</strong> is in the target spec, but currently in the wrong position.</p>
+          </div>
+
+          <div class="example-row">
+            <div class="example-tiles">
+              <span class="tile tile-example">T</span>
+              <span class="tile tile-example">W</span>
+              <span class="tile tile-example absent">I</span>
+              <span class="tile tile-example">S</span>
+              <span class="tile tile-example">T</span>
+            </div>
+            <p><strong>I</strong> is not in the specification in any spot.</p>
+          </div>
+        </div>
+
+        <div class="how-footer-note">
+          <p>A new cocktail specification unlocks every day at midnight. Previous daily releases are preserved forever in <strong>The Vault</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       5. MODAL: PATRON RECORDS & STATISTICS
+       ====================================================================== -->
+  <div id="modal-stats" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="stats-title">
+    <div class="modal-card neo-card glass-panel modal-scrollable">
+      <div class="modal-header">
+        <h2 id="stats-title" class="gold-shimmer">PATRON RECORD</h2>
+        <button class="modal-close" data-close="modal-stats" aria-label="Close statistics">&times;</button>
+      </div>
+
+      <div class="stats-summary">
+        <div class="stat-box">
+          <span id="stat-played" class="stat-num">0</span>
+          <span class="stat-label">Played</span>
+        </div>
+        <div class="stat-box">
+          <span id="stat-win-rate" class="stat-num">0%</span>
+          <span class="stat-label">Win Rate</span>
+        </div>
+        <div class="stat-box">
+          <span id="stat-current-streak" class="stat-num">0</span>
+          <span class="stat-label">Current Streak</span>
+        </div>
+        <div class="stat-box">
+          <span id="stat-max-streak" class="stat-num">0</span>
+          <span class="stat-label">Max Streak</span>
+        </div>
+      </div>
+
+      <h3 class="stats-subtitle">GUESS DISTRIBUTION</h3>
+      <div id="guess-distribution" class="guess-distribution">
+        <!-- Bars 1-6 rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       6. MODAL: GAME OVER & SPEC EDUCATION CARD
+       ====================================================================== -->
+  <div id="modal-complete" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="complete-title">
+    <div class="modal-card neo-card glass-panel modal-scrollable">
+      <div class="modal-header">
+        <div>
+          <span id="complete-status-tag" class="status-tag">SPEC SOLVED</span>
+          <h2 id="complete-title" class="gold-shimmer">MASTER MIXOLOGIST</h2>
+        </div>
+        <button class="modal-close" data-close="modal-complete" aria-label="Close result">&times;</button>
+      </div>
+
+      <!-- Cocktail Specification Education Card -->
+      <div class="spec-card neo-card">
+        <div class="spec-header">
+          <span id="spec-category" class="spec-curriculum">Curriculum: Classic Cocktails</span>
+          <span id="spec-difficulty" class="spec-difficulty">Medium</span>
+        </div>
+        <div class="spec-word-display">
+          <span class="spec-word-label">Drink Specification:</span>
+          <strong id="spec-word" class="spec-word">SHAKE</strong>
+        </div>
+        <p id="spec-definition" class="spec-lore">The vigorous chilling, aerating, and emulsifying technique used for cocktails containing citrus, egg, or cream.</p>
+        <div class="spec-bar-note">
+          <span class="note-label">Bartender's Lore:</span>
+          <p id="spec-lore">Dry-shake without ice first when emulsifying egg whites to build a velvety, sustained foam.</p>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="complete-actions">
+        <button id="btn-share" class="neo-btn btn-gold">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.2" fill="none">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+          SHARE SPEC RESULT
+        </button>
+
+        <div class="next-countdown-container">
+          <span class="countdown-label">NEXT SPEC UNLOCKS IN:</span>
+          <span id="countdown-timer" class="countdown-timer">00:00:00</span>
+        </div>
+
+        <div class="complete-secondary-nav">
+          <button id="btn-complete-menu" class="btn-text-gold">Return to Menu</button>
+          <span>•</span>
+          <button id="btn-complete-vault" class="btn-text-gold">Browse Vault</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts: Content Database + Engine Controller -->
+  <script src="puzzles.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
