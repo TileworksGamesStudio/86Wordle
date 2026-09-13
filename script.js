@@ -5,6 +5,7 @@
   const HOME_PAGE_URL = "https://tileworksgamesstudio.github.io/86/"; 
   const STORAGE_KEY = "word_guess_data_v1";
   const CSV_FILE = "puzzles.csv";
+  const RELEASE_TIMEZONE = "UTC"; // Explicit IANA release timezone
 
   // Built-in fallback puzzle dataset for offline & resilient operation
   const FALLBACK_PUZZLES = [
@@ -91,7 +92,6 @@
       }
     }
 
-    // High frequency crystalline tick for key typing
     playKeyTick() {
       try {
         this.init();
@@ -113,7 +113,6 @@
       } catch (e) {}
     }
 
-    // Muted brass clink for buttons & navigation
     playButtonTap() {
       try {
         this.init();
@@ -135,7 +134,6 @@
       } catch (e) {}
     }
 
-    // Subtle crystal chime on successful guess validation
     playWinChime() {
       try {
         this.init();
@@ -159,7 +157,6 @@
       } catch (e) {}
     }
 
-    // Muted low resonant tone on error
     playErrorTone() {
       try {
         this.init();
@@ -185,43 +182,20 @@
   const sound = new SpeakeasyAudio();
 
   /* ==========================================================================
-     EXACTLY TWELVE COCKTAIL GARNISH SVG SILHOUETTE TEMPLATES
+     TWELVE COCKTAIL GARNISH SVG SILHOUETTES
      ========================================================================== */
   const GARNISH_SVGS = [
-    // 1. Orange twist
     `<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><path d="M25 80 C 10 40, 50 15, 75 30 C 95 45, 70 85, 45 75 C 30 70, 35 50, 55 50 C 70 50, 80 65, 70 80" stroke="#f6ad48"/></svg>`,
-
-    // 2. Lemon twist
     `<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M15 25 Q 40 10 70 30 T 40 75 Q 25 85 50 90 T 85 70" stroke="#fdf0ce"/></svg>`,
-
-    // 3. Lime wheel
     `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="42" stroke="#5deb93" stroke-width="5"/><circle cx="50" cy="50" r="34" stroke="#5deb93" stroke-width="2" opacity="0.6"/><path d="M50 16 L50 84 M16 50 L84 50 M26 26 L74 74 M26 74 L74 26" stroke="#5deb93" stroke-width="2.5" opacity="0.8"/></svg>`,
-
-    // 4. Lemon wheel
     `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="42" stroke="#fdf0ce" stroke-width="5"/><circle cx="50" cy="50" r="35" stroke="#fdf0ce" stroke-width="2" opacity="0.7"/><circle cx="50" cy="50" r="4" fill="#fdf0ce"/><path d="M50 16 L50 84 M16 50 L84 50 M26 26 L74 74 M26 74 L74 26" stroke="#fdf0ce" stroke-width="2.5" opacity="0.75"/></svg>`,
-
-    // 5. Dehydrated orange wheel
     `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="43" stroke="#a7461f" stroke-width="6" stroke-dasharray="8 3"/><circle cx="50" cy="50" r="35" stroke="#c99a43" stroke-width="2" opacity="0.7"/><circle cx="50" cy="50" r="7" fill="#7a3a1b"/><path d="M50 16 L50 84 M16 50 L84 50 M26 26 L74 74 M26 74 L74 26" stroke="#a7461f" stroke-width="3"/></svg>`,
-
-    // 6. Dehydrated lemon wheel
     `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="42" stroke="#b88a38" stroke-width="5" stroke-dasharray="6 2"/><circle cx="50" cy="50" r="34" stroke="#e8c16b" stroke-width="1.8" opacity="0.7"/><circle cx="50" cy="50" r="6" fill="#8e6224"/><path d="M50 17 L50 83 M17 50 L83 50 M27 27 L73 73 M27 73 L73 27" stroke="#b88a38" stroke-width="2"/></svg>`,
-
-    // 7. Cocktail cherry
     `<svg viewBox="0 0 100 100" fill="none"><circle cx="45" cy="65" r="24" fill="#b93b2a" opacity="0.85"/><circle cx="45" cy="65" r="22" stroke="#e8c16b" stroke-width="2"/><ellipse cx="38" cy="58" rx="6" ry="3" fill="#fff" opacity="0.45"/><path d="M45 42 C 45 15, 75 10, 85 20" stroke="#8e6224" stroke-width="4" stroke-linecap="round"/></svg>`,
-
-    // 8. Maraschino cherry pair
     `<svg viewBox="0 0 100 100" fill="none"><circle cx="34" cy="70" r="18" fill="#a72d20" opacity="0.85"/><circle cx="34" cy="70" r="17" stroke="#e8c16b" stroke-width="1.8"/><circle cx="68" cy="68" r="18" fill="#b93b2a" opacity="0.85"/><circle cx="68" cy="68" r="17" stroke="#e8c16b" stroke-width="1.8"/><path d="M34 52 C 34 25, 52 14, 52 14 C 52 14, 68 30, 68 50" stroke="#8e6224" stroke-width="3" stroke-linecap="round"/><circle cx="52" cy="14" r="3" fill="#e8c16b"/></svg>`,
-
-    // 9. Mint sprig
     `<svg viewBox="0 0 100 100" fill="none"><path d="M50 85 L50 30" stroke="#5deb93" stroke-width="3" stroke-linecap="round"/><path d="M50 65 Q 20 60 25 40 Q 45 42 50 65 Z" fill="#246d3c" stroke="#5deb93" stroke-width="1.5" opacity="0.85"/><path d="M50 55 Q 80 50 75 30 Q 55 32 50 55 Z" fill="#246d3c" stroke="#5deb93" stroke-width="1.5" opacity="0.85"/><path d="M50 35 Q 35 15 50 10 Q 65 15 50 35 Z" fill="#2e854c" stroke="#5deb93" stroke-width="1.5" opacity="0.85"/></svg>`,
-
-    // 10. Rosemary sprig
     `<svg viewBox="0 0 100 100" fill="none" stroke="#689f38" stroke-width="2.5" stroke-linecap="round"><path d="M50 90 L50 15"/><path d="M50 75 L30 65 M50 75 L70 65"/><path d="M50 60 L28 50 M50 60 L72 50"/><path d="M50 45 L32 35 M50 45 L68 35"/><path d="M50 30 L36 20 M50 30 L64 20"/><path d="M50 18 L44 8 M50 18 L56 8"/></svg>`,
-
-    // 11. Green olive on skewer
     `<svg viewBox="0 0 100 100" fill="none"><line x1="20" y1="85" x2="85" y2="18" stroke="#fdf0ce" stroke-width="3.5" stroke-linecap="round"/><ellipse cx="50" cy="50" rx="20" ry="26" fill="#4d6b2c" stroke="#e8c16b" stroke-width="2" transform="rotate(-40 50 50)"/><ellipse cx="50" cy="50" rx="6" ry="9" fill="#c34a26" transform="rotate(-40 50 50)"/></svg>`,
-
-    // 12. Cucumber ribbon
     `<svg viewBox="0 0 100 100" fill="none" stroke="#5deb93" stroke-width="3" stroke-linecap="round"><path d="M20 75 Q 35 90 55 75 T 80 40 Q 60 20 40 35 T 25 60" fill="rgba(46, 117, 65, 0.25)" opacity="0.75"/><circle cx="50" cy="50" r="2" fill="#fff" opacity="0.6"/><circle cx="45" cy="40" r="1.5" fill="#fff" opacity="0.5"/><circle cx="60" cy="55" r="1.5" fill="#fff" opacity="0.5"/></svg>`
   ];
 
@@ -242,7 +216,6 @@
     }
 
     start() {
-      // Seed initial particles smoothly across the screen height
       for (let i = 0; i < Math.floor(this.maxParticles * 0.7); i++) {
         this.spawnParticle(Math.random() * 90);
       }
@@ -266,11 +239,9 @@
       el.className = "garnish-particle";
       el.setAttribute("aria-hidden", "true");
 
-      // Random selection from exactly 12 garnishes
       const iconIndex = Math.floor(Math.random() * GARNISH_SVGS.length);
       el.innerHTML = GARNISH_SVGS[iconIndex];
 
-      // Depth classification
       const depthRoll = Math.random();
       let depthClass = "depth-middle";
       let baseScale = 0.65 + Math.random() * 0.35;
@@ -294,8 +265,8 @@
       el.style.width = `${sizePx}px`;
       el.style.height = `${sizePx}px`;
 
-      const startLeft = Math.random() * 92; // percent
-      const driftX = (Math.random() - 0.5) * 80; // px
+      const startLeft = Math.random() * 92;
+      const driftX = (Math.random() - 0.5) * 80;
       const rotationStart = Math.random() * 360;
       const rotationEnd = rotationStart + (Math.random() > 0.5 ? 1 : -1) * (180 + Math.random() * 180);
 
@@ -304,34 +275,18 @@
       this.container.appendChild(el);
       this.activeParticles++;
 
-      // Keyframe animation via Web Animations API for high performance
       const startY = initialPercentY >= 0 ? (window.innerHeight * (100 - initialPercentY)) / 100 : window.innerHeight + 80;
       const endY = -100;
       const currentDuration = initialPercentY >= 0 ? duration * ((100 - initialPercentY) / 100) : duration;
 
       const animation = el.animate(
         [
-          {
-            transform: `translate3d(0, ${startY}px, 0) rotate(${rotationStart}deg)`,
-            opacity: 0
-          },
-          {
-            opacity: opacity,
-            offset: 0.15
-          },
-          {
-            opacity: opacity * 0.9,
-            offset: 0.85
-          },
-          {
-            transform: `translate3d(${driftX}px, ${endY}px, 0) rotate(${rotationEnd}deg)`,
-            opacity: 0
-          }
+          { transform: `translate3d(0, ${startY}px, 0) rotate(${rotationStart}deg)`, opacity: 0 },
+          { opacity: opacity, offset: 0.15 },
+          { opacity: opacity * 0.9, offset: 0.85 },
+          { transform: `translate3d(${driftX}px, ${endY}px, 0) rotate(${rotationEnd}deg)`, opacity: 0 }
         ],
-        {
-          duration: currentDuration * 1000,
-          easing: "linear"
-        }
+        { duration: currentDuration * 1000, easing: "linear" }
       );
 
       animation.onfinish = () => {
@@ -423,23 +378,20 @@
     });
   }
 
-  function getTodayString() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-
   /* ==========================================================================
-     MAIN APPLICATION CLASS
+     MAIN APPLICATION CLASS (AUTHORITATIVE RELEASE ARCHITECTURE)
      ========================================================================== */
   class WordGuessApp {
     constructor() {
       this.state = loadState();
       this.puzzles = [];
       this.currentPuzzle = null;
-      this.todayString = getTodayString();
+      
+      // Authoritative synchronization variables
+      this.authoritativeInstant = null;
+      this.perfTimeAtSync = null;
+      this.authoritativeTodayString = null;
+
       this.activeInput = "";
       this.guesses = [];
       this.isComplete = false;
@@ -452,7 +404,6 @@
       this.attachEvents();
       this.loadPuzzleData();
 
-      // Launch ambient cocktail garnish background
       new GarnishAtmosphere();
     }
 
@@ -527,15 +478,54 @@
       }
     }
 
+    /*
+     * Derives authoritative calendar date in explicit IANA timezone.
+     * Uses monotonic performance.now() from sync point to defeat device clock tampering.
+     */
+    getAuthoritativeTodayString() {
+      if (this.authoritativeInstant === null || this.perfTimeAtSync === null) {
+        return null; // Fail closed if authoritative server instant is unavailable
+      }
+      const elapsed = performance.now() - this.perfTimeAtSync;
+      const currentInstant = new Date(this.authoritativeInstant + elapsed);
+
+      const dtf = new Intl.DateTimeFormat("en-US", {
+        timeZone: RELEASE_TIMEZONE,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour12: false
+      });
+      const parts = dtf.formatToParts(currentInstant);
+      const year = parts.find((p) => p.type === "year").value;
+      const month = parts.find((p) => p.type === "month").value;
+      const day = parts.find((p) => p.type === "day").value;
+      return `${year}-${month}-${day}`;
+    }
+
     async loadPuzzleData() {
       try {
-        const response = await fetch(CSV_FILE);
+        const response = await fetch(CSV_FILE, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" }
+        });
+
+        // Parse origin server HTTP Date header
+        const dateHeader = response.headers.get("date");
+        if (dateHeader) {
+          const parsedEpoch = Date.parse(dateHeader);
+          if (!Number.isNaN(parsedEpoch)) {
+            this.authoritativeInstant = parsedEpoch;
+            this.perfTimeAtSync = performance.now();
+          }
+        }
+
         if (!response.ok) throw new Error("CSV fetch failed");
         const text = await response.text();
         const parsed = parseCSV(text);
 
         const list = parsed
-          .filter((p) => p.date && p.word && p.word.length === 5)
+          .filter((p) => p.date && /^\d{4}-\d{2}-\d{2}$/.test(p.date) && p.word && p.word.length === 5)
           .map((p) => ({
             date: p.date,
             word: p.word.toUpperCase().trim(),
@@ -547,39 +537,76 @@
         this.puzzles = FALLBACK_PUZZLES;
       }
 
+      // If response Date header was omitted by environment, try same-origin HEAD check
+      if (this.authoritativeInstant === null) {
+        try {
+          const headRes = await fetch(window.location.href, { method: "HEAD", cache: "no-store" });
+          const headDate = headRes.headers.get("date");
+          if (headDate) {
+            const parsedEpoch = Date.parse(headDate);
+            if (!Number.isNaN(parsedEpoch)) {
+              this.authoritativeInstant = parsedEpoch;
+              this.perfTimeAtSync = performance.now();
+            }
+          }
+        } catch (e) {}
+      }
+
+      this.authoritativeTodayString = this.getAuthoritativeTodayString();
       this.puzzles.forEach((p) => VALID_WORDS.add(p.word));
       this.updateMenuSummary();
     }
 
+    /*
+     * Absolute Rule 1 & Rule 5:
+     * Never returns an unreleased puzzle. If no puzzle exists for today,
+     * safely returns the most recent released past puzzle, or null.
+     */
     getDailyPuzzle() {
-      const todayMatch = this.puzzles.find((p) => p.date === this.todayString);
+      this.authoritativeTodayString = this.getAuthoritativeTodayString();
+      if (!this.authoritativeTodayString) return null;
+
+      const todayMatch = this.puzzles.find((p) => p.date === this.authoritativeTodayString);
       if (todayMatch) return todayMatch;
 
       const past = this.puzzles
-        .filter((p) => p.date <= this.todayString)
+        .filter((p) => p.date < this.authoritativeTodayString)
         .sort((a, b) => b.date.localeCompare(a.date));
 
       if (past.length > 0) return past[0];
-      return this.puzzles[0];
+      return null;
     }
 
     updateMenuSummary() {
+      this.authoritativeTodayString = this.getAuthoritativeTodayString();
       const daily = this.getDailyPuzzle();
-      if (!daily) return;
 
-      const record = this.state.puzzles[daily.date];
-      if (record && record.completed) {
-        this.dom.menuDailyStatus.textContent = record.won
-          ? `Decanted (${record.guesses.length}/6)`
-          : "Completed (X/6)";
-      } else if (record && record.guesses && record.guesses.length > 0) {
-        this.dom.menuDailyStatus.textContent = `In Progress (${record.guesses.length}/6)`;
-      } else {
-        this.dom.menuDailyStatus.textContent = "Ready to uncork";
+      if (!this.authoritativeTodayString) {
+        this.dom.menuDailyStatus.textContent = "Verifying release time...";
+        this.dom.menuVaultCount.textContent = "Reserve locked";
+        return;
       }
 
-      const availableVaultPuzzles = this.puzzles.filter((p) => p.date !== daily.date);
-      this.dom.menuVaultCount.textContent = `${availableVaultPuzzles.length} vintage reserves`;
+      if (daily) {
+        const record = this.state.puzzles[daily.date];
+        if (record && record.completed) {
+          this.dom.menuDailyStatus.textContent = record.won
+            ? `Decanted (${record.guesses.length}/6)`
+            : "Completed (X/6)";
+        } else if (record && record.guesses && record.guesses.length > 0) {
+          this.dom.menuDailyStatus.textContent = `In Progress (${record.guesses.length}/6)`;
+        } else {
+          this.dom.menuDailyStatus.textContent = "Ready to uncork";
+        }
+      } else {
+        this.dom.menuDailyStatus.textContent = "No vintage today";
+      }
+
+      // Vault count exclusively reflects released historical puzzles
+      const pastPuzzles = this.puzzles.filter(
+        (p) => p.date < this.authoritativeTodayString && (!daily || p.date !== daily.date)
+      );
+      this.dom.menuVaultCount.textContent = `${pastPuzzles.length} vintage reserve${pastPuzzles.length === 1 ? "" : "s"}`;
     }
 
     initBoard() {
@@ -648,7 +675,12 @@
 
       this.dom.navDaily.addEventListener("click", () => {
         const daily = this.getDailyPuzzle();
-        if (daily) this.startPuzzle(daily, true);
+        if (daily) {
+          this.startPuzzle(daily, true);
+        } else {
+          sound.playErrorTone();
+          this.showToast(this.authoritativeTodayString ? "No puzzle available for today" : "Verifying release time...");
+        }
       });
 
       this.dom.navVault.addEventListener("click", () => {
@@ -698,7 +730,19 @@
       });
     }
 
+    /*
+     * Mandatory Release Guard on Entry Point (Absolute Rule 1 & Rule 8)
+     */
     startPuzzle(puzzle, isDaily) {
+      if (!puzzle || !puzzle.date) return;
+
+      this.authoritativeTodayString = this.getAuthoritativeTodayString();
+      if (!this.authoritativeTodayString || puzzle.date > this.authoritativeTodayString) {
+        sound.playErrorTone();
+        this.showToast("This vintage is not yet released");
+        return;
+      }
+
       this.currentPuzzle = puzzle;
       this.activeInput = "";
       this.guesses = [];
@@ -913,12 +957,25 @@
       }
     }
 
+    /*
+     * Absolute Rule 1 & Rule 11:
+     * Excludes all future puzzles from Vault DOM rendering and selection.
+     */
     renderVault() {
       this.dom.vaultList.innerHTML = "";
+      this.authoritativeTodayString = this.getAuthoritativeTodayString();
+
+      if (!this.authoritativeTodayString) {
+        const emptyMsg = document.createElement("p");
+        emptyMsg.className = "vault-caption";
+        emptyMsg.textContent = "Verifying release calendar...";
+        this.dom.vaultList.appendChild(emptyMsg);
+        return;
+      }
 
       const daily = this.getDailyPuzzle();
       const archiveItems = this.puzzles
-        .filter((p) => !daily || p.date !== daily.date)
+        .filter((p) => p.date < this.authoritativeTodayString && (!daily || p.date !== daily.date))
         .sort((a, b) => b.date.localeCompare(a.date));
 
       if (archiveItems.length === 0) {
@@ -1003,7 +1060,7 @@
         bar.textContent = count;
 
         const currentSolvedIndex = this.guesses.length - 1;
-        if (this.isComplete && this.state.puzzles[this.currentPuzzle.date]?.won && currentSolvedIndex === i) {
+        if (this.isComplete && this.state.puzzles[this.currentPuzzle?.date]?.won && currentSolvedIndex === i) {
           bar.classList.add("highlight");
         }
 
