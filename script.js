@@ -3,7 +3,7 @@
 
   // Configuration & External Links compliant with Section 6
   const HOME_PAGE_URL = "https://tileworksgamesstudio.github.io/86/"; 
-  const STORAGE_KEY = "word_guess_data_v1";
+  const STORAGE_KEY = "COCKTAIL_word_guess_data_v1";
   const CSV_FILE = "puzzles.csv";
   const RELEASE_TIMEZONE = "UTC"; // Explicit IANA release timezone
 
