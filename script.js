@@ -1,13 +1,15 @@
 (function () {
   "use strict";
 
-  // Configuration & External Links compliant with Section 6
+  // Configuration & External Links
   const HOME_PAGE_URL = "https://tileworksgamesstudio.github.io/86/"; 
-  const STORAGE_KEY = "COCKTAIL_word_guess_data_v1";
+  const STORAGE_KEY = "cocktails_word_guess_data_v1";
   const CSV_FILE = "puzzles.csv";
-  const RELEASE_TIMEZONE = "UTC"; // Explicit IANA release timezone
+  const WORDS_FILE = "words.txt";
+  // Explicit IANA release timezone (Bible Phase 6)
+  const RELEASE_TIMEZONE = "UTC";
 
-  // Built-in fallback puzzle dataset for offline & resilient operation
+  // Built-in fallback puzzle dataset
   const FALLBACK_PUZZLES = [
     { date: "2025-05-18", word: "PRIDE", definition: "A feeling of deep satisfaction from one's achievements." },
     { date: "2025-05-19", word: "CLEAN", definition: "Free from dirt, marks, or unwanted matter." },
@@ -18,287 +20,9 @@
     { date: "2025-05-24", word: "CRANE", definition: "A large tall machine used for moving heavy objects." }
   ];
 
-  const VALID_WORDS = new Set([
-    "ABOUT", "ABOVE", "ABUSE", "ACTOR", "ACUTE", "ADMIT", "ADOPT", "ADULT", "AFTER", "AGAIN",
-    "AGENT", "AGREE", "AHEAD", "ALARM", "ALBUM", "ALERT", "ALIKE", "ALIVE", "ALLOW", "ALONE",
-    "ALONG", "ALTER", "AMONG", "ANGER", "ANGLE", "ANGRY", "APART", "APPLE", "APPLY", "ARENA",
-    "ARGUE", "ARISE", "ARMED", "ARRAY", "ASIDE", "ASSET", "AUDIO", "AUDIT", "AVOID", "AWARD",
-    "AWARE", "BADLY", "BAKER", "BASES", "BASIC", "BASIS", "BEACH", "BEGAN", "BEGIN", "BEGUN",
-    "BEING", "BELOW", "BENCH", "BILLY", "BIRTH", "BLACK", "BLAME", "BLIND", "BLOCK", "BLOOD",
-    "BOARD", "BOOST", "BOOTH", "BOUND", "BRAIN", "BRAND", "BRAVE", "BREAD", "BREAK", "BREED",
-    "BRIEF", "BRING", "BROAD", "BROKE", "BROWN", "BUILD", "CABLE", "CARRY", "CATCH", "CAUSE",
-    "CHAIN", "CHAIR", "CHART", "CHASE", "CHEAP", "CHECK", "CHEST", "CHIEF", "CHILD", "CHOSE",
-    "CIVIL", "CLAIM", "CLASS", "CLEAN", "CLEAR", "CLICK", "CLOCK", "CLOSE", "COAST", "COULD",
-    "COUNT", "COURT", "COVER", "CRAFT", "CRANE", "CREAM", "CRIME", "CROSS", "CROWD", "CROWN",
-    "CURVE", "CYCLE", "DAILY", "DANCE", "DATED", "DEALT", "DEATH", "DEBUT", "DELAY", "DEPTH",
-    "DOING", "DOUBT", "DOZEN", "DRAFT", "DRAMA", "DRAWN", "DREAM", "DRESS", "DRILL", "DRINK",
-    "DRIVE", "DROVE", "DYING", "EAGER", "EARLY", "EARTH", "EIGHT", "ELITE", "EMPTY", "ENEMY",
-    "ENJOY", "ENTER", "ENTRY", "EQUAL", "ERROR", "EVENT", "EVERY", "EXACT", "EXIST", "EXTRA",
-    "FAITH", "FALSE", "FAULT", "FIBER", "FIELD", "FIFTH", "FIFTY", "FIGHT", "FINAL", "FIRST",
-    "FIXED", "FLASH", "FLEET", "FLOOR", "FLUID", "FOCUS", "FORCE", "FORTH", "FORTY", "FORUM",
-    "FOUND", "FRAME", "FRANK", "FRAUD", "FRESH", "FRONT", "FRUIT", "FULLY", "FUNNY", "GIANT",
-    "GIVEN", "GLASS", "GLOBE", "GOING", "GRACE", "GRADE", "GRAIN", "GRAND", "GRANT", "GRASS",
-    "GREAT", "GREEN", "GROSS", "GROUP", "GROWN", "GUARD", "GUESS", "GUEST", "GUIDE", "HAPPY",
-    "HEART", "HEAVY", "HENCE", "HONEY", "HORSE", "HOTEL", "HOUSE", "HUMAN", "IDEAL", "IMAGE",
-    "INDEX", "INNER", "INPUT", "ISSUE", "JOINT", "JUDGE", "JUICE", "KNIFE", "KNOWN", "LABEL",
-    "LARGE", "LASER", "LATER", "LAUGH", "LAYER", "LEARN", "LEASE", "LEAST", "LEAVE", "LEGAL",
-    "LEMON", "LEVEL", "LIGHT", "LIMIT", "LINKS", "LIVES", "LOCAL", "LOGIC", "LOOSE", "LOWER",
-    "LUCKY", "LUNCH", "MAGIC", "MAJOR", "MAKER", "MARCH", "MATCH", "MAYBE", "MAYOR", "MEANT",
-    "MEDIA", "METAL", "MIGHT", "MINOR", "MINUS", "MIXED", "MODEL", "MONEY", "MONTH", "MORAL",
-    "MOTOR", "MOUNT", "MOUSE", "MOUTH", "MOVIE", "MUSIC", "NEEDS", "NEVER", "NEWLY", "NIGHT",
-    "NOISE", "NORTH", "NOTED", "NOVEL", "NURSE", "OCCUR", "OFFER", "OFTEN", "ORDER", "OTHER",
-    "OUGHT", "PAINT", "PANEL", "PAPER", "PARTY", "PEACE", "PHASE", "PHONE", "PHOTO", "PIECE",
-    "PILOT", "PITCH", "PLACE", "PLAIN", "PLANE", "PLANT", "PLATE", "POINT", "POUND", "POWER",
-    "PRESS", "PRICE", "PRIDE", "PRIME", "PRINT", "PRIOR", "PRIZE", "PROOF", "PROUD", "PROVE",
-    "QUEEN", "QUICK", "QUIET", "QUITE", "RADIO", "RAISE", "RANGE", "RAPID", "RATIO", "REACH",
-    "READY", "REFER", "RIGHT", "RIVAL", "RIVER", "ROUGH", "ROUND", "ROUTE", "ROYAL", "RURAL",
-    "SCALE", "SCENE", "SCOPE", "SCORE", "SENSE", "SERVE", "SEVEN", "SHALL", "SHAPE", "SHARE",
-    "SHARP", "SHEET", "SHELF", "SHELL", "SHIFT", "SHIRT", "SHOCK", "SHOOT", "SHORT", "SHOWN",
-    "SIGHT", "SINCE", "SIXTH", "SIXTY", "SIZED", "SKILL", "SLEEP", "SLIDE", "SMALL", "SMART",
-    "SMILE", "SMOKE", "SOLID", "SOLVE", "SORRY", "SOUND", "SOUTH", "SPACE", "SPARE", "SPEAK",
-    "SPEED", "SPEND", "SPENT", "SPLIT", "SPOKE", "SPORT", "STAFF", "STAGE", "STAKE", "STAND",
-    "START", "STATE", "STEAM", "STEEL", "STICK", "STILL", "STOCK", "STONE", "STOOD", "STORE",
-    "STORM", "STORY", "STRIP", "STUDY", "STUFF", "STYLE", "SUGAR", "SUITE", "SUPER", "SWEET",
-    "SWIFT", "TABLE", "TAKEN", "TASTE", "TAXES", "TEACH", "TEETH", "THANK", "THEFT", "THEIR",
-    "THEME", "THERE", "THESE", "THICK", "THING", "THINK", "THIRD", "THOSE", "THREE", "THREW",
-    "THROW", "TIGHT", "TIMES", "TIRED", "TITLE", "TODAY", "TOPIC", "TOTAL", "TOUCH", "TOUGH",
-    "TOWER", "TRACK", "TRADE", "TRAIN", "TREAT", "TREND", "TRIAL", "TRIED", "TRIES", "TRUCK",
-    "TRULY", "TRUST", "TRUTH", "TWICE", "UNDER", "UNDUE", "UNION", "UNITY", "UNTIL", "UPON",
-    "UPPER", "UPSET", "URBAN", "USAGE", "USUAL", "VALID", "VALUE", "VIDEO", "VIRUS", "VISIT",
-    "VITAL", "VOICE", "WASTE", "WATCH", "WATER", "WHEEL", "WHERE", "WHICH", "WHILE", "WHITE",
-    "WHOLE", "WHOSE", "WOMAN", "WOMEN", "WORLD", "WORRY", "WORSE", "WORST", "WORTH", "WOULD",
-    "WOUND", "WRITE", "WRONG", "WROTE", "YIELD", "YOUNG", "YOUTH"
-  ]);
+  // Dynamic set populated from words.txt and puzzles.csv
+  const VALID_WORDS = new Set();
 
-  /* ==========================================================================
-     SUBTLE WEB AUDIO SYNTHESIZER (NO EXTERNAL ASSETS / GESTURE SAFE)
-     ========================================================================== */
-  class SpeakeasyAudio {
-    constructor() {
-      this.ctx = null;
-    }
-
-    init() {
-      if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
-        try {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          this.ctx = new AudioContextClass();
-        } catch (e) {
-          this.ctx = null;
-        }
-      }
-      if (this.ctx && this.ctx.state === "suspended") {
-        this.ctx.resume().catch(() => {});
-      }
-    }
-
-    playKeyTick() {
-      try {
-        this.init();
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(1400, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.035);
-
-        gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.035);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.04);
-      } catch (e) {}
-    }
-
-    playButtonTap() {
-      try {
-        this.init();
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(420, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(260, this.ctx.currentTime + 0.05);
-
-        gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.05);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.06);
-      } catch (e) {}
-    }
-
-    playWinChime() {
-      try {
-        this.init();
-        if (!this.ctx) return;
-        const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
-        notes.forEach((freq, idx) => {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.09);
-
-          gain.gain.setValueAtTime(0.035, this.ctx.currentTime + idx * 0.09);
-          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + idx * 0.09 + 0.28);
-
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-
-          osc.start(this.ctx.currentTime + idx * 0.09);
-          osc.stop(this.ctx.currentTime + idx * 0.09 + 0.3);
-        });
-      } catch (e) {}
-    }
-
-    playErrorTone() {
-      try {
-        this.init();
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(160, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(110, this.ctx.currentTime + 0.12);
-
-        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.12);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.13);
-      } catch (e) {}
-    }
-  }
-
-  const sound = new SpeakeasyAudio();
-
-  /* ==========================================================================
-     TWELVE COCKTAIL GARNISH SVG SILHOUETTES
-     ========================================================================== */
-  const GARNISH_SVGS = [
-    `<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><path d="M25 80 C 10 40, 50 15, 75 30 C 95 45, 70 85, 45 75 C 30 70, 35 50, 55 50 C 70 50, 80 65, 70 80" stroke="#f6ad48"/></svg>`,
-    `<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M15 25 Q 40 10 70 30 T 40 75 Q 25 85 50 90 T 85 70" stroke="#fdf0ce"/></svg>`,
-    `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="42" stroke="#5deb93" stroke-width="5"/><circle cx="50" cy="50" r="34" stroke="#5deb93" stroke-width="2" opacity="0.6"/><path d="M50 16 L50 84 M16 50 L84 50 M26 26 L74 74 M26 74 L74 26" stroke="#5deb93" stroke-width="2.5" opacity="0.8"/></svg>`,
-    `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="42" stroke="#fdf0ce" stroke-width="5"/><circle cx="50" cy="50" r="35" stroke="#fdf0ce" stroke-width="2" opacity="0.7"/><circle cx="50" cy="50" r="4" fill="#fdf0ce"/><path d="M50 16 L50 84 M16 50 L84 50 M26 26 L74 74 M26 74 L74 26" stroke="#fdf0ce" stroke-width="2.5" opacity="0.75"/></svg>`,
-    `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="43" stroke="#a7461f" stroke-width="6" stroke-dasharray="8 3"/><circle cx="50" cy="50" r="35" stroke="#c99a43" stroke-width="2" opacity="0.7"/><circle cx="50" cy="50" r="7" fill="#7a3a1b"/><path d="M50 16 L50 84 M16 50 L84 50 M26 26 L74 74 M26 74 L74 26" stroke="#a7461f" stroke-width="3"/></svg>`,
-    `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="42" stroke="#b88a38" stroke-width="5" stroke-dasharray="6 2"/><circle cx="50" cy="50" r="34" stroke="#e8c16b" stroke-width="1.8" opacity="0.7"/><circle cx="50" cy="50" r="6" fill="#8e6224"/><path d="M50 17 L50 83 M17 50 L83 50 M27 27 L73 73 M27 73 L73 27" stroke="#b88a38" stroke-width="2"/></svg>`,
-    `<svg viewBox="0 0 100 100" fill="none"><circle cx="45" cy="65" r="24" fill="#b93b2a" opacity="0.85"/><circle cx="45" cy="65" r="22" stroke="#e8c16b" stroke-width="2"/><ellipse cx="38" cy="58" rx="6" ry="3" fill="#fff" opacity="0.45"/><path d="M45 42 C 45 15, 75 10, 85 20" stroke="#8e6224" stroke-width="4" stroke-linecap="round"/></svg>`,
-    `<svg viewBox="0 0 100 100" fill="none"><circle cx="34" cy="70" r="18" fill="#a72d20" opacity="0.85"/><circle cx="34" cy="70" r="17" stroke="#e8c16b" stroke-width="1.8"/><circle cx="68" cy="68" r="18" fill="#b93b2a" opacity="0.85"/><circle cx="68" cy="68" r="17" stroke="#e8c16b" stroke-width="1.8"/><path d="M34 52 C 34 25, 52 14, 52 14 C 52 14, 68 30, 68 50" stroke="#8e6224" stroke-width="3" stroke-linecap="round"/><circle cx="52" cy="14" r="3" fill="#e8c16b"/></svg>`,
-    `<svg viewBox="0 0 100 100" fill="none"><path d="M50 85 L50 30" stroke="#5deb93" stroke-width="3" stroke-linecap="round"/><path d="M50 65 Q 20 60 25 40 Q 45 42 50 65 Z" fill="#246d3c" stroke="#5deb93" stroke-width="1.5" opacity="0.85"/><path d="M50 55 Q 80 50 75 30 Q 55 32 50 55 Z" fill="#246d3c" stroke="#5deb93" stroke-width="1.5" opacity="0.85"/><path d="M50 35 Q 35 15 50 10 Q 65 15 50 35 Z" fill="#2e854c" stroke="#5deb93" stroke-width="1.5" opacity="0.85"/></svg>`,
-    `<svg viewBox="0 0 100 100" fill="none" stroke="#689f38" stroke-width="2.5" stroke-linecap="round"><path d="M50 90 L50 15"/><path d="M50 75 L30 65 M50 75 L70 65"/><path d="M50 60 L28 50 M50 60 L72 50"/><path d="M50 45 L32 35 M50 45 L68 35"/><path d="M50 30 L36 20 M50 30 L64 20"/><path d="M50 18 L44 8 M50 18 L56 8"/></svg>`,
-    `<svg viewBox="0 0 100 100" fill="none"><line x1="20" y1="85" x2="85" y2="18" stroke="#fdf0ce" stroke-width="3.5" stroke-linecap="round"/><ellipse cx="50" cy="50" rx="20" ry="26" fill="#4d6b2c" stroke="#e8c16b" stroke-width="2" transform="rotate(-40 50 50)"/><ellipse cx="50" cy="50" rx="6" ry="9" fill="#c34a26" transform="rotate(-40 50 50)"/></svg>`,
-    `<svg viewBox="0 0 100 100" fill="none" stroke="#5deb93" stroke-width="3" stroke-linecap="round"><path d="M20 75 Q 35 90 55 75 T 80 40 Q 60 20 40 35 T 25 60" fill="rgba(46, 117, 65, 0.25)" opacity="0.75"/><circle cx="50" cy="50" r="2" fill="#fff" opacity="0.6"/><circle cx="45" cy="40" r="1.5" fill="#fff" opacity="0.5"/><circle cx="60" cy="55" r="1.5" fill="#fff" opacity="0.5"/></svg>`
-  ];
-
-  /* ==========================================================================
-     RANDOMIZED COCKTAIL GARNISH FLOATING ENGINE
-     ========================================================================== */
-  class GarnishAtmosphere {
-    constructor() {
-      this.container = document.getElementById("garnish-canvas-container");
-      this.activeParticles = 0;
-      this.maxParticles = window.innerWidth < 600 ? 9 : 16;
-      this.spawnTimer = null;
-
-      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (!prefersReduced && this.container) {
-        this.start();
-      }
-    }
-
-    start() {
-      for (let i = 0; i < Math.floor(this.maxParticles * 0.7); i++) {
-        this.spawnParticle(Math.random() * 90);
-      }
-      this.loop();
-    }
-
-    loop() {
-      const interval = 1200 + Math.random() * 1600;
-      this.spawnTimer = setTimeout(() => {
-        if (this.activeParticles < this.maxParticles) {
-          this.spawnParticle(-10);
-        }
-        this.loop();
-      }, interval);
-    }
-
-    spawnParticle(initialPercentY = -10) {
-      if (!this.container) return;
-
-      const el = document.createElement("div");
-      el.className = "garnish-particle";
-      el.setAttribute("aria-hidden", "true");
-
-      const iconIndex = Math.floor(Math.random() * GARNISH_SVGS.length);
-      el.innerHTML = GARNISH_SVGS[iconIndex];
-
-      const depthRoll = Math.random();
-      let depthClass = "depth-middle";
-      let baseScale = 0.65 + Math.random() * 0.35;
-      let duration = 22 + Math.random() * 12;
-      let opacity = 0.45;
-
-      if (depthRoll < 0.38) {
-        depthClass = "depth-distant";
-        baseScale = 0.4 + Math.random() * 0.2;
-        duration = 32 + Math.random() * 16;
-        opacity = 0.25;
-      } else if (depthRoll > 0.82) {
-        depthClass = "depth-near";
-        baseScale = 0.9 + Math.random() * 0.35;
-        duration = 16 + Math.random() * 8;
-        opacity = 0.65;
-      }
-
-      el.classList.add(depthClass);
-      const sizePx = 42 * baseScale;
-      el.style.width = `${sizePx}px`;
-      el.style.height = `${sizePx}px`;
-
-      const startLeft = Math.random() * 92;
-      const driftX = (Math.random() - 0.5) * 80;
-      const rotationStart = Math.random() * 360;
-      const rotationEnd = rotationStart + (Math.random() > 0.5 ? 1 : -1) * (180 + Math.random() * 180);
-
-      el.style.left = `${startLeft}%`;
-
-      this.container.appendChild(el);
-      this.activeParticles++;
-
-      const startY = initialPercentY >= 0 ? (window.innerHeight * (100 - initialPercentY)) / 100 : window.innerHeight + 80;
-      const endY = -100;
-      const currentDuration = initialPercentY >= 0 ? duration * ((100 - initialPercentY) / 100) : duration;
-
-      const animation = el.animate(
-        [
-          { transform: `translate3d(0, ${startY}px, 0) rotate(${rotationStart}deg)`, opacity: 0 },
-          { opacity: opacity, offset: 0.15 },
-          { opacity: opacity * 0.9, offset: 0.85 },
-          { transform: `translate3d(${driftX}px, ${endY}px, 0) rotate(${rotationEnd}deg)`, opacity: 0 }
-        ],
-        { duration: currentDuration * 1000, easing: "linear" }
-      );
-
-      animation.onfinish = () => {
-        el.remove();
-        this.activeParticles--;
-      };
-    }
-  }
-
-  /* ==========================================================================
-     STATE MANAGEMENT & CSV PARSING
-     ========================================================================== */
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -378,20 +102,34 @@
     });
   }
 
-  /* ==========================================================================
-     MAIN APPLICATION CLASS (AUTHORITATIVE RELEASE ARCHITECTURE)
-     ========================================================================== */
+  /**
+   * Converts a given JavaScript Date instant into an ISO YYYY-MM-DD string
+   * formatted strictly under the configured release timezone.
+   */
+  function formatDateInTimezone(dateObj, timezone) {
+    try {
+      const formatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: timezone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      });
+      return formatter.format(dateObj); // Produces YYYY-MM-DD
+    } catch (e) {
+      // Fallback to UTC if timezone is invalid
+      const year = dateObj.getUTCFullYear();
+      const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+      const day = String(dateObj.getUTCDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+  }
+
   class WordGuessApp {
     constructor() {
       this.state = loadState();
       this.puzzles = [];
       this.currentPuzzle = null;
-      
-      // Authoritative synchronization variables
-      this.authoritativeInstant = null;
-      this.perfTimeAtSync = null;
-      this.authoritativeTodayString = null;
-
+      this.authoritativeToday = null; // Set via authoritative server time
       this.activeInput = "";
       this.guesses = [];
       this.isComplete = false;
@@ -402,9 +140,7 @@
       this.initBoard();
       this.initKeyboard();
       this.attachEvents();
-      this.loadPuzzleData();
-
-      new GarnishAtmosphere();
+      this.initAuthoritativeSession();
     }
 
     cacheElements() {
@@ -462,7 +198,6 @@
     }
 
     switchView(viewName) {
-      sound.playButtonTap();
       Object.keys(this.views).forEach((key) => {
         if (key === viewName) {
           this.views[key].classList.remove("hidden");
@@ -478,54 +213,62 @@
       }
     }
 
-    /*
-     * Derives authoritative calendar date in explicit IANA timezone.
-     * Uses monotonic performance.now() from sync point to defeat device clock tampering.
+    /**
+     * Obtains authoritative time from the HTTP Date header (Bible Phase 4 & 5).
+     * Falls back to UTC Date only when offline / server header unavailable.
      */
-    getAuthoritativeTodayString() {
-      if (this.authoritativeInstant === null || this.perfTimeAtSync === null) {
-        return null; // Fail closed if authoritative server instant is unavailable
+    async fetchAuthoritativeDate() {
+      try {
+        const response = await fetch(`${CSV_FILE}?_t=${Date.now()}`, { method: "HEAD" });
+        const serverDateHeader = response.headers.get("Date");
+        if (serverDateHeader) {
+          const parsedMs = Date.parse(serverDateHeader);
+          if (!isNaN(parsedMs)) {
+            return formatDateInTimezone(new Date(parsedMs), RELEASE_TIMEZONE);
+          }
+        }
+      } catch (err) {
+        // Fallback gracefully if running in isolated local environments
       }
-      const elapsed = performance.now() - this.perfTimeAtSync;
-      const currentInstant = new Date(this.authoritativeInstant + elapsed);
+      return formatDateInTimezone(new Date(), RELEASE_TIMEZONE);
+    }
 
-      const dtf = new Intl.DateTimeFormat("en-US", {
-        timeZone: RELEASE_TIMEZONE,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour12: false
-      });
-      const parts = dtf.formatToParts(currentInstant);
-      const year = parts.find((p) => p.type === "year").value;
-      const month = parts.find((p) => p.type === "month").value;
-      const day = parts.find((p) => p.type === "day").value;
-      return `${year}-${month}-${day}`;
+    async initAuthoritativeSession() {
+      this.authoritativeToday = await this.fetchAuthoritativeDate();
+      // Load both puzzles and the dictionary concurrently
+      await Promise.all([this.loadPuzzleData(), this.loadWordList()]);
+    }
+
+    /**
+     * Fetches and parses words.txt into the VALID_WORDS set.
+     */
+    async loadWordList() {
+      try {
+        const response = await fetch(WORDS_FILE);
+        if (!response.ok) throw new Error("Failed to load words.txt");
+        const text = await response.text();
+        const lines = text.split(/\r?\n/);
+        
+        for (let i = 0; i < lines.length; i++) {
+          const word = lines[i].trim().toUpperCase();
+          if (word.length === 5) {
+            VALID_WORDS.add(word);
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load words.txt; falling back to puzzle solution words:", err);
+      }
     }
 
     async loadPuzzleData() {
       try {
-        const response = await fetch(CSV_FILE, {
-          cache: "no-store",
-          headers: { "Cache-Control": "no-cache" }
-        });
-
-        // Parse origin server HTTP Date header
-        const dateHeader = response.headers.get("date");
-        if (dateHeader) {
-          const parsedEpoch = Date.parse(dateHeader);
-          if (!Number.isNaN(parsedEpoch)) {
-            this.authoritativeInstant = parsedEpoch;
-            this.perfTimeAtSync = performance.now();
-          }
-        }
-
+        const response = await fetch(CSV_FILE);
         if (!response.ok) throw new Error("CSV fetch failed");
         const text = await response.text();
         const parsed = parseCSV(text);
 
         const list = parsed
-          .filter((p) => p.date && /^\d{4}-\d{2}-\d{2}$/.test(p.date) && p.word && p.word.length === 5)
+          .filter((p) => p.date && p.word && p.word.length === 5)
           .map((p) => ({
             date: p.date,
             word: p.word.toUpperCase().trim(),
@@ -537,76 +280,64 @@
         this.puzzles = FALLBACK_PUZZLES;
       }
 
-      // If response Date header was omitted by environment, try same-origin HEAD check
-      if (this.authoritativeInstant === null) {
-        try {
-          const headRes = await fetch(window.location.href, { method: "HEAD", cache: "no-store" });
-          const headDate = headRes.headers.get("date");
-          if (headDate) {
-            const parsedEpoch = Date.parse(headDate);
-            if (!Number.isNaN(parsedEpoch)) {
-              this.authoritativeInstant = parsedEpoch;
-              this.perfTimeAtSync = performance.now();
-            }
-          }
-        } catch (e) {}
-      }
-
-      this.authoritativeTodayString = this.getAuthoritativeTodayString();
+      // Ensure every puzzle solution word is guaranteed to be accepted as a guess
       this.puzzles.forEach((p) => VALID_WORDS.add(p.word));
       this.updateMenuSummary();
     }
 
-    /*
-     * Absolute Rule 1 & Rule 5:
-     * Never returns an unreleased puzzle. If no puzzle exists for today,
-     * safely returns the most recent released past puzzle, or null.
+    /**
+     * Selects today's puzzle.
+     * Guaranteed never to return any future puzzle (Bible Phase 3 & 10).
      */
     getDailyPuzzle() {
-      this.authoritativeTodayString = this.getAuthoritativeTodayString();
-      if (!this.authoritativeTodayString) return null;
+      if (!this.authoritativeToday) return null;
 
-      const todayMatch = this.puzzles.find((p) => p.date === this.authoritativeTodayString);
+      // Exact match for authoritative today
+      const todayMatch = this.puzzles.find((p) => p.date === this.authoritativeToday);
       if (todayMatch) return todayMatch;
 
-      const past = this.puzzles
-        .filter((p) => p.date < this.authoritativeTodayString)
+      // Fallback only to released puzzles on or before authoritative today
+      const pastOrToday = this.puzzles
+        .filter((p) => p.date <= this.authoritativeToday)
         .sort((a, b) => b.date.localeCompare(a.date));
 
-      if (past.length > 0) return past[0];
+      if (pastOrToday.length > 0) {
+        return pastOrToday[0];
+      }
+
+      // If all puzzles in dataset are future, fail closed: do NOT expose future puzzle
       return null;
     }
 
     updateMenuSummary() {
-      this.authoritativeTodayString = this.getAuthoritativeTodayString();
       const daily = this.getDailyPuzzle();
 
-      if (!this.authoritativeTodayString) {
-        this.dom.menuDailyStatus.textContent = "Verifying release time...";
-        this.dom.menuVaultCount.textContent = "Reserve locked";
-        return;
-      }
-
-      if (daily) {
+      if (!daily) {
+        this.dom.menuDailyStatus.textContent = "No puzzle available";
+        this.dom.navDaily.classList.add("disabled");
+      } else {
+        this.dom.navDaily.classList.remove("disabled");
         const record = this.state.puzzles[daily.date];
         if (record && record.completed) {
           this.dom.menuDailyStatus.textContent = record.won
-            ? `Decanted (${record.guesses.length}/6)`
+            ? `Completed (${record.guesses.length}/6)`
             : "Completed (X/6)";
         } else if (record && record.guesses && record.guesses.length > 0) {
           this.dom.menuDailyStatus.textContent = `In Progress (${record.guesses.length}/6)`;
         } else {
-          this.dom.menuDailyStatus.textContent = "Ready to uncork";
+          this.dom.menuDailyStatus.textContent = "Ready to play";
         }
-      } else {
-        this.dom.menuDailyStatus.textContent = "No vintage today";
       }
 
-      // Vault count exclusively reflects released historical puzzles
-      const pastPuzzles = this.puzzles.filter(
-        (p) => p.date < this.authoritativeTodayString && (!daily || p.date !== daily.date)
-      );
-      this.dom.menuVaultCount.textContent = `${pastPuzzles.length} vintage reserve${pastPuzzles.length === 1 ? "" : "s"}`;
+      // Vault count must strictly count released past puzzles
+      if (this.authoritativeToday) {
+        const releasedPastPuzzles = this.puzzles.filter(
+          (p) => p.date < this.authoritativeToday && (!daily || p.date !== daily.date)
+        );
+        this.dom.menuVaultCount.textContent = `${releasedPastPuzzles.length} available`;
+      } else {
+        this.dom.menuVaultCount.textContent = "0 available";
+      }
     }
 
     initBoard() {
@@ -678,8 +409,7 @@
         if (daily) {
           this.startPuzzle(daily, true);
         } else {
-          sound.playErrorTone();
-          this.showToast(this.authoritativeTodayString ? "No puzzle available for today" : "Verifying release time...");
+          this.showToast("No puzzle currently released");
         }
       });
 
@@ -695,23 +425,11 @@
         this.switchView("menu");
       });
 
-      this.dom.btnMenuRules.addEventListener("click", () => {
-        sound.playButtonTap();
-        this.openDialog(this.dom.modalRules);
-      });
-      this.dom.btnMenuStats.addEventListener("click", () => {
-        sound.playButtonTap();
-        this.renderStatsModal();
-      });
+      this.dom.btnMenuRules.addEventListener("click", () => this.openDialog(this.dom.modalRules));
+      this.dom.btnMenuStats.addEventListener("click", () => this.renderStatsModal());
 
-      this.dom.btnGameRules.addEventListener("click", () => {
-        sound.playButtonTap();
-        this.openDialog(this.dom.modalRules);
-      });
-      this.dom.btnGameStats.addEventListener("click", () => {
-        sound.playButtonTap();
-        this.renderStatsModal();
-      });
+      this.dom.btnGameRules.addEventListener("click", () => this.openDialog(this.dom.modalRules));
+      this.dom.btnGameStats.addEventListener("click", () => this.renderStatsModal());
 
       this.dom.btnShare.addEventListener("click", () => this.shareResult());
       this.dom.btnResultVault.addEventListener("click", () => {
@@ -721,7 +439,6 @@
 
       document.querySelectorAll("[data-close]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          sound.playButtonTap();
           const target = document.getElementById(btn.dataset.close);
           if (target && typeof target.close === "function") {
             target.close();
@@ -730,16 +447,16 @@
       });
     }
 
-    /*
-     * Mandatory Release Guard on Entry Point (Absolute Rule 1 & Rule 8)
+    /**
+     * Starts a puzzle.
+     * Enforces strict release verification guard (Bible Phase 12).
      */
     startPuzzle(puzzle, isDaily) {
       if (!puzzle || !puzzle.date) return;
 
-      this.authoritativeTodayString = this.getAuthoritativeTodayString();
-      if (!this.authoritativeTodayString || puzzle.date > this.authoritativeTodayString) {
-        sound.playErrorTone();
-        this.showToast("This vintage is not yet released");
+      // Absolute Release Boundary Guard
+      if (this.authoritativeToday && puzzle.date > this.authoritativeToday) {
+        this.showToast("This puzzle is not yet released.");
         return;
       }
 
@@ -748,9 +465,9 @@
       this.guesses = [];
       this.isComplete = false;
 
-      const title = isDaily ? "DAILY SELECTION" : `VAULT: ${puzzle.date}`;
+      const title = isDaily ? "DAILY PUZZLE" : `VAULT: ${puzzle.date}`;
       this.dom.gamePuzzleTitle.textContent = title;
-      this.dom.gamePuzzleDate.textContent = isDaily ? `Vintage Today (${puzzle.date})` : puzzle.date;
+      this.dom.gamePuzzleDate.textContent = isDaily ? `Today (${puzzle.date})` : puzzle.date;
 
       this.resetBoardAndKeyboard();
 
@@ -762,7 +479,7 @@
 
         if (saved.completed) {
           this.isComplete = true;
-          this.dom.gameStatusPill.textContent = saved.won ? "DECANTED" : "CONCLUDED";
+          this.dom.gameStatusPill.textContent = saved.won ? "SOLVED" : "GAME OVER";
           this.dom.gameStatusPill.classList.remove("hidden");
         } else {
           this.dom.gameStatusPill.classList.add("hidden");
@@ -796,13 +513,11 @@
         this.submitGuess();
       } else if (key === "BACK") {
         if (this.activeInput.length > 0) {
-          sound.playKeyTick();
           this.activeInput = this.activeInput.slice(0, -1);
           this.renderActiveRow();
         }
       } else if (/^[A-Z]$/.test(key)) {
         if (this.activeInput.length < 5) {
-          sound.playKeyTick();
           this.activeInput += key;
           this.renderActiveRow();
         }
@@ -825,15 +540,13 @@
 
     submitGuess() {
       if (this.activeInput.length !== 5) {
-        sound.playErrorTone();
         this.showToast("Not enough letters");
         return;
       }
 
       const guess = this.activeInput.toUpperCase();
       if (!VALID_WORDS.has(guess)) {
-        sound.playErrorTone();
-        this.showToast("Word not recognised");
+        this.showToast("Word not recognized");
         return;
       }
 
@@ -845,18 +558,11 @@
 
       if (won || lost) {
         this.isComplete = true;
-        this.dom.gameStatusPill.textContent = won ? "DECANTED" : "CONCLUDED";
+        this.dom.gameStatusPill.textContent = won ? "SOLVED" : "GAME OVER";
         this.dom.gameStatusPill.classList.remove("hidden");
         this.recordProgress(won);
-
-        if (won) {
-          sound.playWinChime();
-        } else {
-          sound.playErrorTone();
-        }
-        setTimeout(() => this.openResultModal(won), 500);
+        setTimeout(() => this.openResultModal(won), 450);
       } else {
-        sound.playButtonTap();
         this.saveCurrentProgress(false, false);
       }
     }
@@ -957,31 +663,30 @@
       }
     }
 
-    /*
-     * Absolute Rule 1 & Rule 11:
-     * Excludes all future puzzles from Vault DOM rendering and selection.
+    /**
+     * Renders the Vault.
+     * Strictly filters for puzzles where release date < authoritative today (Bible Phase 3 & 11).
      */
     renderVault() {
       this.dom.vaultList.innerHTML = "";
-      this.authoritativeTodayString = this.getAuthoritativeTodayString();
 
-      if (!this.authoritativeTodayString) {
+      if (!this.authoritativeToday) {
         const emptyMsg = document.createElement("p");
         emptyMsg.className = "vault-caption";
-        emptyMsg.textContent = "Verifying release calendar...";
+        emptyMsg.textContent = "Loading vault...";
         this.dom.vaultList.appendChild(emptyMsg);
         return;
       }
 
-      const daily = this.getDailyPuzzle();
+      // Exclude current daily puzzle AND all unreleased future puzzles
       const archiveItems = this.puzzles
-        .filter((p) => p.date < this.authoritativeTodayString && (!daily || p.date !== daily.date))
+        .filter((p) => p.date < this.authoritativeToday)
         .sort((a, b) => b.date.localeCompare(a.date));
 
       if (archiveItems.length === 0) {
         const emptyMsg = document.createElement("p");
         emptyMsg.className = "vault-caption";
-        emptyMsg.textContent = "No archived vintages yet.";
+        emptyMsg.textContent = "No archived puzzles available.";
         this.dom.vaultList.appendChild(emptyMsg);
         return;
       }
@@ -994,23 +699,23 @@
 
         const progress = this.state.puzzles[p.date];
         let badgeClass = "unplayed";
-        let badgeText = "UNSOLVED";
-        let statusText = "Tap to uncork";
+        let badgeText = "UNPLAYED";
+        let statusText = "Tap to solve";
 
         if (progress && progress.completed) {
           if (progress.won) {
             badgeClass = "solved";
             badgeText = `${progress.guesses.length}/6`;
-            statusText = "Decanted";
+            statusText = "Completed";
           } else {
             badgeClass = "failed";
-            badgeText = "CONCLUDED";
-            statusText = "Unresolved vintage";
+            badgeText = "FAILED";
+            statusText = "Not solved";
           }
         } else if (progress && progress.guesses && progress.guesses.length > 0) {
           badgeClass = "unplayed";
           badgeText = `${progress.guesses.length}/6`;
-          statusText = "In tasting";
+          statusText = "In progress";
         }
 
         card.innerHTML = `
@@ -1074,18 +779,17 @@
     }
 
     openResultModal(won) {
-      this.dom.resultTitle.textContent = won ? "DECANTED WITH ELEGANCE" : "LAST CALL";
+      this.dom.resultTitle.textContent = won ? "WELL DONE!" : "BETTER LUCK NEXT TIME";
       this.dom.resultWord.textContent = this.currentPuzzle.word;
       this.dom.resultDefinition.textContent = this.currentPuzzle.definition || "";
       this.dom.resultSummary.textContent = won
-        ? `Solved cleanly in ${this.guesses.length} of 6 attempts.`
-        : "Failed to decipher the vintage within 6 attempts.";
+        ? `Solved in ${this.guesses.length} of 6 attempts.`
+        : "Failed to guess the word within 6 tries.";
 
       this.openDialog(this.dom.modalResult);
     }
 
     shareResult() {
-      sound.playButtonTap();
       const record = this.state.puzzles[this.currentPuzzle.date];
       const count = record && record.won ? this.guesses.length : "X";
       let text = `Word Guess (${this.currentPuzzle.date}) ${count}/6\n\n`;
@@ -1100,7 +804,7 @@
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text.trim()).then(() => {
-          this.showToast("Copied card to clipboard");
+          this.showToast("Copied to clipboard!");
         });
       } else {
         this.showToast("Clipboard not supported");
@@ -1113,7 +817,7 @@
       clearTimeout(this.toastTimeout);
       this.toastTimeout = setTimeout(() => {
         this.dom.toast.classList.add("hidden");
-      }, 2200);
+      }, 2100);
     }
 
     openDialog(modal) {
